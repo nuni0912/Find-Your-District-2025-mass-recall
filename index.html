@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="依戶籍所在地查詢2025年32件罷免案。資料只在瀏覽器處理，不上傳、不保存。">
+  <title>2025罷免案地區查詢</title>
+  <style>
+    :root { color-scheme: light; --ink:#142b43; --muted:#52677b; --line:#d8e2ec; --blue:#195d83; --blue2:#e9f3f8; --paper:#fff; --canvas:#f3f7fa; --green:#18745c; --shadow:0 16px 45px rgba(25,59,86,.08); }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--canvas); color:var(--ink); font-family:system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif; font-size:16px; line-height:1.65; }
+    .wrap { width:min(100% - 32px, 900px); margin:0 auto; padding:38px 0 56px; }
+    .eyebrow { color:var(--blue); font-size:14px; font-weight:700; letter-spacing:.04em; }
+    h1 { margin:8px 0 8px; font-size:clamp(28px,5vw,38px); line-height:1.25; letter-spacing:-.02em; }
+    .intro { margin:0; max-width:720px; color:var(--muted); font-size:17px; }
+    .panel { margin-top:28px; padding:clamp(20px,4vw,34px); border:1px solid var(--line); border-radius:20px; background:var(--paper); box-shadow:var(--shadow); }
+    .step { display:grid; grid-template-columns:1fr; gap:20px; }
+    .field { min-width:0; }
+    label { display:block; margin-bottom:7px; font-size:15px; font-weight:700; }
+    select { width:100%; min-height:52px; padding:12px 42px 12px 14px; border:1px solid #aebfce; border-radius:10px; background:#fff; color:var(--ink); font:inherit; appearance:none; background-image:linear-gradient(45deg,transparent 50%,#315a75 50%),linear-gradient(135deg,#315a75 50%,transparent 50%); background-position:calc(100% - 20px) 22px,calc(100% - 14px) 22px; background-size:6px 6px,6px 6px; background-repeat:no-repeat; }
+    select:focus-visible, button:focus-visible { outline:3px solid #79bde0; outline-offset:2px; }
+    select:disabled { color:#718497; background-color:#f2f5f7; }
+    .helper { margin:6px 0 0; color:var(--muted); font-size:14px; }
+    .privacy { display:flex; gap:12px; align-items:flex-start; margin-top:22px; padding:14px 16px; border-radius:12px; background:#f0f7f4; color:#265746; font-size:14px; }
+    .privacy strong { display:block; margin-bottom:2px; }
+    .privacy-mark { flex:none; width:9px; height:9px; margin-top:8px; border-radius:50%; background:var(--green); }
+    .result { margin-top:22px; padding:22px; border:1px solid #bfd5e2; border-radius:14px; background:#f8fbfd; }
+    .result[hidden], .field[hidden] { display:none; }
+    .result h2 { margin:0 0 8px; font-size:21px; }
+    .result p { margin:0; color:var(--muted); }
+    .case-list { display:grid; gap:12px; margin-top:16px; }
+    .case { padding:17px 18px; border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:10px; background:#fff; }
+    .case-top { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 14px; color:var(--blue); font-size:14px; font-weight:700; }
+    .case h3 { margin:5px 0 2px; font-size:20px; }
+    .case p { color:var(--ink); }
+    .eligibility-note { margin:14px 0 0 !important; padding:11px 13px; border-radius:9px; background:#fff5e9; color:#70471c !important; font-size:14px; }
+    .empty { margin-top:20px; padding:17px; border-radius:12px; background:#fff5e9; color:#70471c; }
+    .legal { margin:22px 0 0; color:var(--muted); font-size:14px; }
+    footer { margin-top:20px; color:#667b8e; font-size:13px; }
+    @media (min-width:680px) { .step { grid-template-columns:1fr 1fr; } .step .field:nth-child(3) { grid-column:1 / -1; max-width:calc(50% - 10px); } }
+    @media (max-width:500px) { .wrap { width:min(100% - 22px,900px); padding-top:26px; } .panel { padding:18px; border-radius:16px; } .intro { font-size:16px; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="eyebrow">2025年罷免案｜地區查詢</div>
+      <h1>你的戶籍地對應哪一案？</h1>
+      <p class="intro">選擇罷免投票時的戶籍所在地。系統會依縣市、行政區，以及部分地區的里別，顯示研究範圍內對應的罷免案與投票日期。</p>
+    </header>
+    <section class="panel" aria-label="地區查詢表單">
+      <div class="step">
+        <div class="field">
+          <label for="city">1. 戶籍在哪個縣市？</label>
+          <select id="city"><option value="">請選擇縣市</option></select>
+        </div>
+        <div class="field">
+          <label for="area">2. 戶籍在哪個行政區／鄉鎮市？</label>
+          <select id="area" disabled><option value="">請先選擇縣市</option></select>
+          <p class="helper" id="areaHint">如選項顯示「全市」或「全縣」，表示本研究案件涵蓋該縣市全部範圍。</p>
+        </div>
+        <div class="field" id="wardField" hidden>
+          <label for="ward">3. 戶籍在哪個里？</label>
+          <select id="ward"><option value="">請選擇里</option></select>
+          <p class="helper">這個行政區跨不同立委選區，因此需要里別才能確認對應案件。</p>
+        </div>
+        <div class="field" id="indigenousField" hidden>
+          <label for="indigenous">4. 是否具原住民身分？</label>
+          <select id="indigenous"><option value="">請選擇</option><option value="yes">是</option><option value="no">否</option></select>
+          <p class="helper">本研究32件罷免案區域立委不含具山地與平地原住民立委；市長罷免案則以一般投票資格判斷。僅供查詢，您的選擇不會被記錄。</p>
+        </div>
+      </div>
+      <div class="privacy"><span class="privacy-mark" aria-hidden="true"></span><div><strong>不會收集或保存你的選擇</strong>所有比對都在目前瀏覽器頁面執行，不會傳送或儲存。本研究32件罷免案區域立委不含具山地與平地原住民立委；市長罷免案則以一般投票資格判斷。此工具不會判斷與蒐集您的年齡、國籍與設籍期間等資料。</div></div>
+      <div class="result" id="result" aria-live="polite" hidden></div>
+      <div class="empty" id="empty" aria-live="polite" hidden></div>
+      <p class="legal">本查詢依中選會公告之第11屆立委選舉區範圍及2025年罷免案資料整理。實際投票資格請依選務機關公告確認。</p>
+    </section>
+    <footer>範圍：2025年7月26日及8月23日投票之32件立委與新竹市長罷免案。</footer>
+  </main>
+  <script>
+    const cases = [{"date":"2025-07-26","city":"基隆市","district":"基隆市選舉區","target":"林沛祥","fullAreas":["全市"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺北市","district":"臺北市第3選舉區","target":"王鴻薇","fullAreas":["中山區"],"splitArea":"松山區","wards":["精忠里","東光里","龍田里","東昌里","東勢里","中華里","民有里","民福里","松基里","莊敬里","東榮里","新益里","新東里","介壽里","三民里","富錦里","富泰里","自強里","鵬程里","安平里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺北市","district":"臺北市第4選舉區","target":"李彥秀","fullAreas":["內湖區","南港區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺北市","district":"臺北市第6選舉區","target":"羅智強","fullAreas":["大安區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺北市","district":"臺北市第7選舉區","target":"徐巧芯","fullAreas":["信義區"],"splitArea":"松山區","wards":["慈祐里","吉祥里","新聚里","復盛里","中正里","中崙里","美仁里","吉仁里","敦化里","復源里","復建里","復勢里","福成里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺北市","district":"臺北市第8選舉區","target":"賴士葆","fullAreas":["文山區"],"splitArea":"中正區","wards":["水源里","富水里","文盛里","林興里","河堤里","螢圃里","網溪里","板溪里","頂東里","螢雪里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"新北市","district":"新北市第1選舉區","target":"洪孟楷","fullAreas":["石門區","三芝區","淡水區","八里區","林口區","泰山區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"新北市","district":"新北市第7選舉區","target":"葉元之","fullAreas":[],"splitArea":"板橋區","wards":["九如里","大安里","大豐里","大觀里","中山里","五權里","仁愛里","正泰里","民生里","民族里","玉光里","光仁里","光復里","成和里","西安里","和平里","居仁里","東丘里","東安里","長安里","長壽里","信義里","後埔里","重慶里","香丘里","埔墘里","振興里","振義里","海山里","浮洲里","國泰里","堂春里","崑崙里","深丘里","富貴里","復興里","景星里","華中里","華東里","華貴里","華福里","華德里","華興里","鄉雲里","溪北里","溪洲里","溪福里","僑中里","福丘里","福安里","福星里","福祿里","福壽里","福德里","聚安里","廣新里","廣福里","廣德里","龍安里","雙玉里","歡園里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"新北市","district":"新北市第8選舉區","target":"張智倫","fullAreas":[],"splitArea":"中和區","wards":["力行里","中山里","中正里","中原里","中興里","仁和里","內南里","文元里","外南里","平河里","正行里","正南里","民生里","民安里","民有里","民享里","瓦磘里","吉興里","安穗里","灰磘里","自強里","佳和里","和興里","忠孝里","明德里","明穗里","枋寮里","東南里","信和里","冠穗里","南山里","建和里","員山里","員富里","國光里","國華里","崇南里","清穗里","連和里","連城里","頂南里","復興里","景文里","景平里","景本里","景安里","景南里","景新里","景福里","華南里","華新里","新南里","瑞穗里","嘉新里","嘉慶里","嘉穗里","壽南里","壽德里","漳和里","碧河里","福和里","福南里","福美里","福真里","福祥里","福善里","廟美里","德行里","德穗里","橫路里","積穗里","興南里","錦中里","錦和里","錦昌里","錦盛里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"新北市","district":"新北市第9選舉區","target":"林德福","fullAreas":["永和區"],"splitArea":"中和區","wards":["泰安里","安平里","中安里","安樂里","宜安里","安順里","安和里","秀明里","秀仁里","秀山里","秀福里","秀義里","秀景里","秀水里","秀士里","秀成里","秀峰里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"新北市","district":"新北市第12選舉區","target":"廖先翔","fullAreas":["金山區","萬里區","汐止區","平溪區","瑞芳區","雙溪區","貢寮區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第1選舉區","target":"牛煦庭","fullAreas":["蘆竹區","龜山區"],"splitArea":"桃園區","wards":["汴洲里","春日里","會稽里","檜樂里","大有里","寶山里","寶民里","大興里","大業里","忠義里","福元里","三元里","青溪里","三民里","萬壽里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第2選舉區","target":"涂權吉","fullAreas":["大園區","觀音區","新屋區","楊梅區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第3選舉區","target":"魯明哲","fullAreas":[],"splitArea":"中壢區","wards":["石頭里","青埔里","華愛里","龍昌里","三民里","光明里","信義里","新明里","龍東里","山東里","仁義里","成功里","後寮里","新街里","龍德里","仁福里","自立里","洽溪里","青溪里","新興里","龍興里","中央里","自治里","振興里","過嶺里","舊明里","內定里","健行里","福德里","中建里","內厝里","至善里","莊敬里","德義里","中原里","內壢里","和平里","復華里","文化里","幸福里","復興里","興華里","中榮里","月眉里","忠孝里","普仁里","興和里","中壢里","水尾里","忠義里","普忠里","興南里","五福里","正義里","忠福里","興福里","普強里","興國里","五權里","永光里","明德里","普義里","龍平里","永福里","東興里","普慶里","仁美里","永興里","芝芭里","龍岡里","中興里","興平里","龍慈里","自信里","林森里","金華里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第4選舉區","target":"萬美玲","fullAreas":[],"splitArea":"桃園區","wards":["中路里","同安里","福安里","中寧里","成功里","信光里","福林里","中德里","自強里","南門里","龍山里","大林里","大樹里","中興里","西門里","南埔里","龍安里","文中里","西埔里","南華里","龍岡里","大豐里","文化里","西湖里","建國里","龍祥里","中山里","文昌里","龍鳳里","中平里","文明里","泰山里","豐林里","中正里","北門里","東山里","莊敬里","中成里","北埔里","東門里","朝陽里","寶慶里","中和里","民生里","東埔里","雲林里","中信里","永安里","武陵里","慈文里","中原里","永興里","長安里","新埔里","經國里","中埔里","玉山里","長美里","中泰里","光興里","長德里","同德里","明德里","瑞慶里","寶安里","中聖里","龍壽里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第5選舉區","target":"呂玉玲","fullAreas":["平鎮區","龍潭區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"桃園市","district":"桃園市第6選舉區","target":"邱若華","fullAreas":["八德區","大溪區","復興區"],"splitArea":"中壢區","wards":["興仁里","自強里","中正里","中山里","篤行里","仁愛里","仁和里","仁祥里","華勛里","仁德里","中堅里","龍安里"],"indigenousExcluded":false},{"date":"2025-07-26","city":"新竹市","district":"新竹市選舉區","target":"鄭正鈐","fullAreas":["全市"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"新竹市","district":"新竹市長罷免案","target":"高虹安","fullAreas":["全市"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺中市","district":"臺中市第4選舉區","target":"廖偉翔","fullAreas":["西屯區","南屯區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺中市","district":"臺中市第5選舉區","target":"黃健豪","fullAreas":["北屯區","北區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"臺中市","district":"臺中市第6選舉區","target":"羅廷瑋","fullAreas":["西區","中區","東區","南區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"雲林縣","district":"雲林縣第1選舉區","target":"丁學忠","fullAreas":["麥寮鄉","臺西鄉","東勢鄉","褒忠鄉","土庫鎮","虎尾鎮","四湖鄉","元長鄉","口湖鄉","水林鄉","北港鎮"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-07-26","city":"花蓮縣","district":"花蓮縣選舉區","target":"傅崐萁","fullAreas":["全縣"],"splitArea":"","wards":[],"indigenousExcluded":true},{"date":"2025-07-26","city":"臺東縣","district":"臺東縣選舉區","target":"黃建賓","fullAreas":["全縣"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"新北市","district":"新北市第11選舉區","target":"羅明才","fullAreas":["新店區","深坑區","石碇區","坪林區","烏來區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"新竹縣","district":"新竹縣第2選舉區","target":"林思銘","fullAreas":["竹東鎮","橫山鄉","寶山鄉","北埔鄉","峨眉鄉","五峰鄉"],"splitArea":"竹北市","wards":["泰和里","竹北里","竹義里","新崙里","福德里","竹仁里","文化里","北崙里","興安里","北興里","十興里","中崙里","斗崙里","鹿場里","東興里","東海里","中興里","隘口里","東平里"],"indigenousExcluded":false},{"date":"2025-08-23","city":"臺中市","district":"臺中市第2選舉區","target":"顏寬恒","fullAreas":["沙鹿區","龍井區","大肚區","烏日區","霧峰區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"臺中市","district":"臺中市第3選舉區","target":"楊瓊瓔","fullAreas":["后里區","神岡區","大雅區","潭子區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"臺中市","district":"臺中市第8選舉區","target":"江啟臣","fullAreas":["豐原區","石岡區","新社區","東勢區","和平區"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"南投縣","district":"南投縣第1選舉區","target":"馬文君","fullAreas":["草屯鎮","國姓鄉","埔里鎮","仁愛鄉","中寮鄉","魚池鄉"],"splitArea":"","wards":[],"indigenousExcluded":false},{"date":"2025-08-23","city":"南投縣","district":"南投縣第2選舉區","target":"游顥","fullAreas":["南投市","名間鄉","集集鎮","竹山鎮","鹿谷鄉","水里鄉","信義鄉"],"splitArea":"","wards":[],"indigenousExcluded":false}];
+    const city = document.getElementById('city');
+    const area = document.getElementById('area');
+    const ward = document.getElementById('ward');
+    const wardField = document.getElementById('wardField');
+    const indigenousField = document.getElementById('indigenousField');
+    const indigenous = document.getElementById('indigenous');
+    const result = document.getElementById('result');
+    const empty = document.getElementById('empty');
+    const unique = values => [...new Set(values)];
+    const reset = (select, placeholder) => { select.replaceChildren(new Option(placeholder, '')); };
+    function showNone(message) {
+      result.hidden = true;
+      empty.textContent = message;
+      empty.hidden = false;
+    }
+    function updateResult() {
+      result.hidden = true;
+      empty.hidden = true;
+      if (!city.value || !area.value) return;
+      const local = cases.filter(c => c.city === city.value && (c.fullAreas.includes(area.value) || c.splitArea === area.value));
+      const hasSplit = local.some(c => c.splitArea === area.value);
+      const hasRegionalLegislatorCase = local.some(c => !c.district.includes('市長'));
+      if (hasSplit && !ward.value) {
+        showNone('請選擇戶籍里別，才能判斷對應選區。');
+        return;
+      }
+      if (hasRegionalLegislatorCase && !indigenous.value) {
+        showNone('請選擇是否具原住民身分，才能判斷區域立委罷免案的投票資格。');
+        return;
+      }
+      const geographicMatches = local.filter(c => c.fullAreas.includes(area.value) || (c.splitArea === area.value && c.wards.includes(ward.value)));
+      const excludedLegislatorCases = indigenous.value === 'yes' ? geographicMatches.filter(c => !c.district.includes('市長')) : [];
+      const matches = geographicMatches.filter(c => c.district.includes('市長') || indigenous.value !== 'yes');
+      if (!geographicMatches.length) {
+        showNone('這個戶籍地不在本研究設定的32件罷免案範圍內。');
+        return;
+      }
+      if (!matches.length && excludedLegislatorCases.length) {
+        showNone('您不具本研究區域立委罷免案的投票權。');
+        return;
+      }
+      empty.hidden = true;
+      result.innerHTML = '';
+      const heading = document.createElement('h2');
+      heading.textContent = matches.length > 1 ? '此戶籍地對應 ' + matches.length + ' 件罷免案' : '此戶籍地對應的罷免案';
+      result.append(heading);
+      const sub = document.createElement('p');
+      sub.textContent = matches.length > 1 ? '同一地區可能同時有不同職務的罷免案。' : '請記下案件名稱與投票日期，返回問卷繼續填答。';
+      result.append(sub);
+      if (excludedLegislatorCases.length) {
+        const note = document.createElement('p');
+        note.className = 'eligibility-note';
+        note.textContent = '此地區另有區域立委罷免案，但具原住民身分者不具該案投票權；以下列出仍對應的市長罷免案。';
+        result.append(note);
+      }
+      const list = document.createElement('div');
+      list.className = 'case-list';
+      matches.forEach(c => {
+        const card = document.createElement('article');
+        card.className = 'case';
+        const top = document.createElement('div');
+        top.className = 'case-top';
+        const type = c.district.includes('市長') ? '市長罷免案' : '立委罷免案';
+        top.textContent = c.date + ' 投票 · ' + type;
+        const title = document.createElement('h3');
+        title.textContent = c.target + '｜' + c.district;
+        const detail = document.createElement('p');
+        detail.textContent = c.district.includes('市長') ? '罷免對象：新竹市長高虹安' : '罷免對象：立法委員' + c.target;
+        card.append(top, title, detail);
+        list.append(card);
+      });
+      result.append(list);
+      result.hidden = false;
+    }
+    function updateAreas() {
+      reset(area, city.value ? '請選擇行政區／鄉鎮市' : '請先選擇縣市');
+      area.disabled = !city.value;
+      wardField.hidden = true;
+      indigenousField.hidden = true;
+      indigenous.value = '';
+      reset(ward, '請選擇里');
+      result.hidden = true; empty.hidden = true;
+      if (!city.value) return;
+      const options = unique(cases.filter(c => c.city === city.value).flatMap(c => [...c.fullAreas, ...(c.splitArea ? [c.splitArea] : [])]));
+      options.forEach(v => area.add(new Option(v, v)));
+    }
+    function updateWards() {
+      reset(ward, '請選擇里');
+      const areaCases = cases.filter(c => c.city === city.value && (c.fullAreas.includes(area.value) || c.splitArea === area.value));
+      const local = areaCases.filter(c => c.splitArea === area.value);
+      wardField.hidden = local.length === 0;
+      indigenousField.hidden = !areaCases.some(c => !c.district.includes('市長'));
+      indigenous.value = '';
+      if (local.length) {
+        const liNames = unique(local.flatMap(c => c.wards));
+        liNames.forEach(v => ward.add(new Option(v, v)));
+      }
+      updateResult();
+    }
+    unique(cases.map(c => c.city)).forEach(v => city.add(new Option(v, v)));
+    city.addEventListener('change', updateAreas);
+    area.addEventListener('change', updateWards);
+    ward.addEventListener('change', updateResult);
+    indigenous.addEventListener('change', updateResult);
+  </script>
+</body>
+</html>
